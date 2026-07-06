@@ -2,7 +2,6 @@
   "name": "server",
   "version": "1.0.0",
   "description": "AI-powered test generation platform using GitHub and Gemini",
-  "type": "module",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
