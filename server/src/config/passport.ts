@@ -22,7 +22,7 @@ passport.use(
       clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
       callbackURL: process.env.GITHUB_CALLBACK_URL || '/auth/github/callback',
     },
-    async (accessToken: string, profile: any, done: any) => {
+    async (accessToken: string,refreshToken: string, profile: any, done: any) => {
       try {
         let user = await User.findOne({ githubId: profile.id });
 

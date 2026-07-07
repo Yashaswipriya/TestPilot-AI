@@ -1,11 +1,26 @@
 import { Request, Response } from 'express';
 
 export const githubCallback = (req: Request, res: Response) => {
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-  res.redirect(frontendUrl);
+  console.log("========== GITHUB CALLBACK ==========");
+  console.log("Authenticated:", req.isAuthenticated?.());
+  console.log("User:", req.user);
+  console.log("Session:", req.session);
+  console.log("=====================================");
+   req.session.save((err) => {
+    if (err) {
+      console.error("Session save failed:", err);
+      return res.sendStatus(500);
+    }
+  const frontendUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  res.redirect(`${frontendUrl}/dashboard`);
+   });
 };
 
 export const getCurrentUser = (req: Request, res: Response) => {
+  console.log("Cookie Header:", req.headers.cookie);
+  console.log("Session:", req.session);
+  console.log("Passport:", (req.session as any).passport);
+  console.log("Authenticated:", req.isAuthenticated());
   if (req.isAuthenticated && req.isAuthenticated()) {
     res.status(200).json({ user: req.user });
   } else {

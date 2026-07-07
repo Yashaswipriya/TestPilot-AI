@@ -11,8 +11,13 @@ router.get(
 
 router.get(
   '/github/callback',
-  passport.authenticate('github', { failureRedirect: '/login' }),
-  githubCallback
+  passport.authenticate('github', { failWithError: true }),
+  githubCallback,
+  (err: any, req: any, res: any, next: any) => {
+  console.error('Full error object:', JSON.stringify(err, Object.getOwnPropertyNames(err), 2));
+  console.error('err.oauthError:', err.oauthError);
+  res.status(500).json({ error: err.message });
+}
 );
 
 router.get('/me', getCurrentUser);
