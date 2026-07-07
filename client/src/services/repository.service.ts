@@ -16,6 +16,17 @@ export interface Repository {
 export const repositoryService = {
   getRepositories: async (): Promise<Repository[]> => {
     const response = await api.get('/repositories');
-    return response.data.repositories;
+    return response.data.map((repo: any) => ({
+      _id: repo.id.toString(),
+      name: repo.name,
+      fullName: repo.full_name,
+      owner: repo.full_name.split('/')[0],
+      url: repo.html_url,
+      description: repo.description,
+      language: repo.language,
+      isPrivate: repo.private,
+      defaultBranch: repo.default_branch,
+      lastSyncedAt: repo.updated_at,
+    }));
   }
 };

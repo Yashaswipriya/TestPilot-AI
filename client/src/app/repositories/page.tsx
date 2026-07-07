@@ -10,16 +10,16 @@ import { Plus } from 'lucide-react';
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
 import { Button } from '@/components/ui/button';
 
-export default function DashboardPage() {
+export default function RepositoryPage() {
   const { data: repositories, isLoading, error, refetch } = useRepositories();
 
   return (
-    <div className="flex flex-col gap-8 flex-1 w-full max-w-6xl mx-auto">
+    <div className="flex flex-col gap-8 flex-1 w-full max-w-6xl mx-auto py-10 px-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div>
           <h1 className="text-[32px] font-extrabold tracking-[-1.2px] text-foreground leading-tight">Your Repositories</h1>
           <p className="text-[15px] text-muted-foreground mt-2 leading-relaxed">
-            Select a repository to generate AI-powered test cases.
+            Select a repository to view its test generation dashboard.
           </p>
         </div>
         <Button variant="primary" className="font-mono tracking-tight text-[13.5px]">

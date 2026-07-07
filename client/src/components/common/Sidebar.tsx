@@ -34,18 +34,18 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="hidden border-r bg-muted/40 md:block md:w-64 lg:w-72">
+    <div className="hidden border-r border-border/50 bg-background/50 backdrop-blur-md md:block md:w-64 lg:w-72">
       <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex h-16 items-center border-b px-6">
-          <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-            <div className="h-8 w-8 rounded-md bg-indigo-600 flex items-center justify-center">
-              <span className="text-white font-bold text-xl">T</span>
+        <div className="flex h-16 items-center border-b border-border/50 px-6">
+          <Link href="/dashboard" className="flex items-center gap-3 font-semibold tracking-tight transition-opacity hover:opacity-80">
+            <div className="flex h-7 w-7 items-center justify-center rounded lg:rounded-md bg-foreground text-background">
+              <span className="font-mono text-sm leading-none font-bold mt-[1px]">T</span>
             </div>
-            <span className="">TestPilot AI</span>
+            <span className="text-lg">TestPilot AI</span>
           </Link>
         </div>
-        <div className="flex-1 overflow-auto py-2">
-          <nav className="grid items-start px-4 text-sm font-medium">
+        <div className="flex-1 overflow-auto py-4">
+          <nav className="grid items-start px-4 text-sm font-medium gap-1">
             {navItems.map((item, index) => {
               const isActive = pathname === item.href;
               return (
@@ -53,21 +53,21 @@ export function Sidebar() {
                   key={index}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 transition-all my-1 hover:text-primary",
+                    "flex items-center gap-3 rounded-lg px-3 py-2 transition-all my-0.5",
                     isActive 
-                      ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400" 
-                      : "text-muted-foreground"
+                      ? "bg-card text-foreground border border-border shadow-sm" 
+                      : "text-muted-foreground hover:bg-card-2 hover:text-foreground"
                   )}
                 >
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className={cn("h-4 w-4", isActive ? "text-green" : "")} />
                   {item.title}
                 </Link>
               );
             })}
           </nav>
         </div>
-        <div className="p-4 border-t px-6">
-          <div className="text-xs text-muted-foreground">© 2026 TestPilot AI</div>
+        <div className="p-4 border-t border-border/50 px-6">
+          <div className="font-mono text-[11px] uppercase tracking-wider text-faint">© 2026 TestPilot AI</div>
         </div>
       </div>
     </div>
