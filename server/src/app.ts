@@ -4,12 +4,18 @@ import dotenv from "dotenv";
 import session from "express-session";
 import passport from "./config/passport";
 import authRoutes from "./routes/auth.routes";
+import repositoryRoutes from "./routes/repository.routes";
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.use(
@@ -28,6 +34,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/auth", authRoutes);
+app.use("/repositories", repositoryRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
