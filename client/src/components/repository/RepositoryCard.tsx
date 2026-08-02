@@ -2,17 +2,28 @@ import * as React from 'react';
 import { Globe, Lock, Clock } from 'lucide-react';
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
 import { motion } from 'framer-motion';
-import { Repository } from '@/services/repository.service';
+import { GitHubRepository, repositoryService } from '@/services/repository.service';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 interface RepositoryCardProps {
-  repository: Repository;
+  repository: GitHubRepository;
 }
 
 export function RepositoryCard({ repository }: RepositoryCardProps) {
+  const handleClick = async (e: React.MouseEvent) => {
+  e.preventDefault();
+
+  const data = await repositoryService.importRepository(
+    repository.owner,
+    repository.name
+  );
+
+  console.log(data);
+}
+
   return (
-    <Link href={`/repository/${repository.owner}/${repository.name}`} className="block h-full group">
+    <Link href={`/repository/${repository.owner}/${repository.name}`} className="block h-full group" onClick={handleClick}>
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2, ease: "easeOut" }}

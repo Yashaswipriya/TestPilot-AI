@@ -1,6 +1,6 @@
-import api from './api';
+import api from "./api";
 
-export interface Repository {
+export interface GitHubRepository {
   _id: string;
   name: string;
   fullName: string;
@@ -14,13 +14,14 @@ export interface Repository {
 }
 
 export const repositoryService = {
-  getRepositories: async (): Promise<Repository[]> => {
-    const response = await api.get('/repositories');
+  getRepositories: async (): Promise<GitHubRepository[]> => {
+    const response = await api.get("/repositories");
+
     return response.data.map((repo: any) => ({
       _id: repo.id.toString(),
       name: repo.name,
       fullName: repo.full_name,
-      owner: repo.full_name.split('/')[0],
+      owner: repo.full_name.split("/")[0],
       url: repo.html_url,
       description: repo.description,
       language: repo.language,
@@ -28,5 +29,13 @@ export const repositoryService = {
       defaultBranch: repo.default_branch,
       lastSyncedAt: repo.updated_at,
     }));
-  }
+  },
+
+  importRepository: async (owner: string, repo: string) => {
+    const response = await api.post(
+      `/repositories/${owner}/${repo}/import`
+    );
+
+    return response.data;
+  },
 };

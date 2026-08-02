@@ -36,16 +36,20 @@ export const githubService = {
   },
 
   getRepository: async (accessToken: string, owner: string, repo: string) => {
-    const client = createGithubClient(accessToken);
-    const response = await client.get(`/repos/${owner}/${repo}`);
-    const data = response.data;
-    
+  const client = createGithubClient(accessToken);
+  const response = await client.get(`/repos/${owner}/${repo}`);
+  const data = response.data;
+
     return {
+      id: data.id,
       name: data.name,
       description: data.description,
       owner: data.owner.login,
+      clone_url: data.clone_url,
+      html_url: data.html_url,
       default_branch: data.default_branch,
       visibility: data.visibility,
+      private: data.private,
       stars: data.stargazers_count,
       forks: data.forks_count,
       open_issues: data.open_issues_count,

@@ -1,84 +1,81 @@
 'use client';
 
 import * as React from 'react';
-import { useRepositories } from '@/hooks/useRepositories';
-import { RepositoryCard } from '@/components/repository/RepositoryCard';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import { EmptyState } from '@/components/common/EmptyState';
-import { ErrorState } from '@/components/common/ErrorState';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus } from 'lucide-react';
-import { GitHubLogoIcon } from '@radix-ui/react-icons';
-import { Button } from '@/components/ui/button';
+import { FolderGit2, TestTube2, Clock } from 'lucide-react';
+
+const stats = [
+  { label: 'Repositories analyzed', value: '0', icon: FolderGit2 },
+  { label: 'Tests generated', value: '0', icon: TestTube2 },
+  { label: 'Last run', value: '—', icon: Clock },
+];
 
 export default function DashboardPage() {
-  const { data: repositories, isLoading, error, refetch } = useRepositories();
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
 
   return (
-    <div className="flex flex-col gap-8 flex-1 w-full max-w-6xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-        <div>
-          <h1 className="text-[32px] font-extrabold tracking-[-1.2px] text-foreground leading-tight">Your Repositories</h1>
-          <p className="text-[15px] text-muted-foreground mt-2 leading-relaxed">
-            Select a repository to generate AI-powered test cases.
-          </p>
-        </div>
-        <Button variant="primary" className="font-mono tracking-tight text-[13.5px]">
-          <Plus className="mr-2 h-4 w-4" />
-          Connect new repo
-        </Button>
+    <div className="flex flex-1 w-full max-w-6xl mx-auto flex-col gap-8">
+      <div className="flex items-center gap-4">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-12 w-12 rounded-full bg-card-2" />
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-40 bg-card-2" />
+              <Skeleton className="h-3.5 w-56 bg-card-2" />
+            </div>
+          </>
+        ) : (
+          <>
+            {user?.avatarUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.avatarUrl}
+                alt={user.username}
+                className="h-12 w-12 rounded-full border border-border"
+              />
+            )}
+            <div>
+              <h1 className="text-[26px] font-extrabold tracking-[-1px] leading-tight text-foreground">
+                Welcome back, {user?.name || user?.username}
+              </h1>
+              <p className="mt-1 text-[14px] text-muted-foreground">
+                Here&apos;s what&apos;s happening across your repositories.
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
-      {isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <Skeleton className="h-10 w-10 rounded-lg bg-card-2" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-32 bg-card-2" />
-                    <Skeleton className="h-3 w-20 bg-card-2" />
-                  </div>
-                </div>
-                <Skeleton className="h-5 w-16 rounded-full bg-card-2" />
-              </div>
-              <Skeleton className="h-10 w-full mb-6 bg-card-2" />
-              <div className="flex justify-between border-t border-border/50 pt-4">
-                <Skeleton className="h-4 w-20 bg-card-2" />
-                <Skeleton className="h-4 w-24 bg-card-2" />
-              </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {stats.map((stat) => (
+          <div
+            key={stat.label}
+            className="flex items-center gap-4 rounded-xl border border-border bg-card p-5"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card-2 text-green">
+              <stat.icon className="h-4.5 w-4.5" />
             </div>
-          ))}
-        </div>
-      )}
+            <div>
+              <div className="text-[22px] font-bold tracking-tight text-foreground">{stat.value}</div>
+              <div className="text-[13px] text-muted-foreground">{stat.label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
 
-      {!isLoading && error && (
-        <ErrorState
-          title="Failed to load repositories"
-          message="There was an error communicating with the server."
-          onRetry={refetch}
-        />
-      )}
-
-      {!isLoading && !error && repositories?.length === 0 && (
+      <div className="flex-1 flex items-center justify-center rounded-xl border border-border bg-card py-16">
         <EmptyState
-          icon={GitHubLogoIcon}
-          title="No repositories found"
-          description="Connect your GitHub account to import repositories and start generating tests."
-          actionLabel="Connect GitHub"
-          onAction={() => {
-            window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/github`;
-          }}
+          icon={TestTube2}
+          title="No analyses yet"
+          description="Pick a repository to generate your first AI-powered test suite."
+          actionLabel="Browse repositories"
+          onAction={() => router.push('/repositories')}
         />
-      )}
-
-      {!isLoading && !error && repositories && repositories.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
-          {repositories.map((repo) => (
-            <RepositoryCard key={repo._id} repository={repo} />
-          ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 }

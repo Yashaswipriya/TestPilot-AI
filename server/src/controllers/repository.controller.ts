@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { githubService } from '../services/github.service';
+import { repositoryService } from "../services/repository.service";
 
 export const getRepositories = async (req: Request, res: Response) => {
   try {
@@ -90,5 +91,33 @@ export const getRepositoryFile = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error(`Error fetching file ${req.query.path} in ${req.params.owner}/${req.params.repo}:`, error.response?.data || error.message);
     res.status(error.response?.status || 500).json({ error: 'Failed to fetch file content' });
+  }
+};
+
+export const importRepository = async (req: Request, res: Response) => {
+  try {
+    const accessToken = (req.user as any)?.accessToken;
+    const userId = (req.user as any)?._id;
+
+    if (!accessToken || !userId) {
+      return res.status(401).json({
+        error: "Unauthorized",
+      });
+    }
+    const owner = req.params.owner as string;
+    const repo = req.params.repo as string;
+    const repository = await repositoryService.getOrCreateRepository(
+      userId,
+      owner,
+      repo,
+      accessToken
+    );
+
+    res.json(repository);
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({
+      error: "Failed to import repository",
+    });
   }
 };

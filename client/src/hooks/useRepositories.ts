@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { repositoryService, Repository } from '@/services/repository.service';
+import { repositoryService, GitHubRepository } from '@/services/repository.service';
 
 export const useRepositories = () => {
-  return useQuery<Repository[]>({
+  return useQuery<GitHubRepository[]>({
     queryKey: ['repositories'],
     queryFn: repositoryService.getRepositories,
   });
