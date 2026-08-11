@@ -1,5 +1,13 @@
 import axios from 'axios';
 
+interface GitHubTreeItem {
+  name: string;
+  path: string;
+  type: "file" | "folder";
+  sha: string;
+  size?: number;
+}
+
 const GITHUB_API_URL = 'https://api.github.com';
 
 const createGithubClient = (accessToken: string) => {
@@ -58,18 +66,26 @@ export const githubService = {
     };
   },
 
-  getRepositoryTree: async (accessToken: string, owner: string, repo: string, branch: string) => {
-    const client = createGithubClient(accessToken);
-    const response = await client.get(`/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`);
-    
-    return response.data.tree.map((item: any) => ({
-      name: item.path.split('/').pop(),
-      path: item.path,
-      type: item.type === 'blob' ? 'file' : 'folder',
-      sha: item.sha,
-      size: item.size,
-    }));
-  },
+  getRepositoryTree: async (
+  accessToken: string,
+  owner: string,
+  repo: string,
+  branch: string
+): Promise<GitHubTreeItem[]> => {
+  const client = createGithubClient(accessToken);
+
+  const response = await client.get(
+    `/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`
+  );
+
+  return response.data.tree.map((item: any) => ({
+    name: item.path.split("/").pop() ?? "",
+    path: item.path,
+    type: item.type === "blob" ? "file" : "folder",
+    sha: item.sha,
+    size: item.size,
+  }));
+},
 
   getFileContent: async (accessToken: string, owner: string, repo: string, path: string, branch?: string) => {
     const client = createGithubClient(accessToken);

@@ -13,6 +13,23 @@ export interface GitHubRepository {
   lastSyncedAt: string;
 }
 
+export interface RepositoryTreeItem {
+  name: string;
+  path: string;
+  type: "file" | "folder";
+  sha: string;
+  size?: number;
+}
+
+export interface RepositoryFile {
+  name: string;
+  path: string;
+  content: string;
+  sha: string;
+  size: number;
+  encoding: string;
+}
+
 export const repositoryService = {
   getRepositories: async (): Promise<GitHubRepository[]> => {
     const response = await api.get("/repositories");
@@ -34,6 +51,40 @@ export const repositoryService = {
   importRepository: async (owner: string, repo: string) => {
     const response = await api.post(
       `/repositories/${owner}/${repo}/import`
+    );
+
+    return response.data;
+  },
+
+  getRepositoryTree: async (
+    owner: string,
+    repo: string,
+    branch?: string
+  ): Promise<RepositoryTreeItem[]> => {
+    const response = await api.get(
+      `/repositories/${owner}/${repo}/tree`,
+      {
+        params: branch ? { branch } : undefined,
+      }
+    );
+
+    return response.data;
+  },
+
+  getRepositoryFile: async (
+  owner: string,
+  repo: string,
+  path: string,
+  branch?: string
+  ): Promise<RepositoryFile> => {
+    const response = await api.get(
+      `/repositories/${owner}/${repo}/file`,
+      {
+        params: {
+          path,
+          ...(branch ? { branch } : {}),
+        },
+      }
     );
 
     return response.data;
