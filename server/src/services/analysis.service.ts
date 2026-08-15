@@ -6,6 +6,7 @@ import {
   AnalysisFile,
 } from "../types/analysis";
 import { githubService } from "./github.service";
+import { historyService } from "./history.service";
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -137,7 +138,8 @@ const getRepositoryContext = async (
 export const analysisService = {
   generateTests: async (
     request: GenerateTestsRequest,
-    accessToken: string
+    accessToken: string,
+    userId: string
   ): Promise<GenerateTestsResponse> => {
     if (!request.owner || !request.repo) {
       throw new Error(
@@ -147,6 +149,10 @@ export const analysisService = {
 
     if (!accessToken) {
       throw new Error("GitHub access token is required");
+    }
+
+    if (!userId) {
+      throw new Error("User ID is required");
     }
 
     if (!request.files || request.files.length === 0) {
@@ -367,6 +373,39 @@ ${filesContext}
         typeof test.framework === "string" &&
         typeof test.explanation === "string"
     );
+
+    /*
+     * Save successful generations to history.
+     *
+     * This is intentionally after Gemini validation so that
+     * incomplete or invalid AI responses are never saved as
+     * successful history entries.
+     */
+    if (validTests.length > 0) {
+      try {
+        await historyService.create({
+          userId,
+          repository: {
+            owner: request.owner,
+            name: request.repo,
+          },
+          generatedTests: validTests,
+        });
+
+        console.log(
+          `Saved test generation history for ${request.owner}/${request.repo}`
+        );
+      } catch (historyError) {
+        /*
+         * History should not break an otherwise successful
+         * test-generation request.
+         */
+        console.error(
+          "Failed to save test generation history:",
+          historyError
+        );
+      }
+    }
 
     return {
       repository: {

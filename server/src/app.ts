@@ -7,6 +7,7 @@ import passport from "./config/passport";
 import authRoutes from "./routes/auth.routes";
 import repositoryRoutes from "./routes/repository.routes";
 import analysisRoutes from "./routes/analysis.routes";
+import historyRoutes from "./routes/history.routes";
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ app.use(passport.session());
 app.use("/auth", authRoutes);
 app.use("/repositories", repositoryRoutes);
 app.use("/analysis", analysisRoutes);
+app.use("/history", historyRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });

@@ -6,7 +6,12 @@ export const generateTests = async (
   res: Response
 ) => {
   try {
-    const accessToken = (req.user as any)?.accessToken;
+    const user = req.user as any;
+
+    const accessToken = user?.accessToken;
+
+    // Passport already stores the MongoDB user ID here.
+    const userId = req.session?.passport?.user;
 
     if (!accessToken) {
       return res.status(401).json({
@@ -14,9 +19,16 @@ export const generateTests = async (
       });
     }
 
+    if (!userId) {
+      return res.status(401).json({
+        error: "User ID not found",
+      });
+    }
+
     const result = await analysisService.generateTests(
       req.body,
-      accessToken
+      accessToken,
+      userId.toString()
     );
 
     res.status(200).json(result);
@@ -24,7 +36,9 @@ export const generateTests = async (
     console.error("Test generation error:", error);
 
     res.status(500).json({
-      error: error.message || "Failed to generate tests",
+      error:
+        error.message ||
+        "Failed to generate tests",
     });
   }
 };
