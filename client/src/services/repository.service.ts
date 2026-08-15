@@ -30,6 +30,22 @@ export interface RepositoryFile {
   encoding: string;
 }
 
+export interface GeneratedTest {
+  sourceFilePath: string;
+  testFilePath: string;
+  testCode: string;
+  framework: string;
+  explanation: string;
+}
+
+export interface GenerateTestsResponse {
+  repository: {
+    owner: string;
+    name: string;
+  };
+  tests: GeneratedTest[];
+}
+
 export const repositoryService = {
   getRepositories: async (): Promise<GitHubRepository[]> => {
     const response = await api.get("/repositories");
@@ -72,10 +88,10 @@ export const repositoryService = {
   },
 
   getRepositoryFile: async (
-  owner: string,
-  repo: string,
-  path: string,
-  branch?: string
+    owner: string,
+    repo: string,
+    path: string,
+    branch?: string
   ): Promise<RepositoryFile> => {
     const response = await api.get(
       `/repositories/${owner}/${repo}/file`,
@@ -84,6 +100,26 @@ export const repositoryService = {
           path,
           ...(branch ? { branch } : {}),
         },
+      }
+    );
+
+    return response.data;
+  },
+
+  generateTests: async (
+    owner: string,
+    repo: string,
+    files: {
+      path: string;
+      content: string;
+    }[]
+  ): Promise<GenerateTestsResponse> => {
+    const response = await api.post(
+      "/analysis/generate-tests",
+      {
+        owner,
+        repo,
+        files,
       }
     );
 

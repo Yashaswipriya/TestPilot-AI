@@ -1,15 +1,8 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import {
-  ChevronRight,
-  ChevronDown,
-  File,
-  Folder,
-  FolderOpen,
-} from 'lucide-react';
-import { RepositoryTreeItem } from '@/services/repository.service';
-
+import * as React from "react";
+import {ChevronRight,ChevronDown,File,Folder,FolderOpen,Sparkles} from "lucide-react";
+import { RepositoryTreeItem } from "@/services/repository.service";
 interface RepositoryTreeProps {
   items: RepositoryTreeItem[];
   selectedFiles: string[];
@@ -19,7 +12,7 @@ interface RepositoryTreeProps {
 interface TreeNode {
   name: string;
   path: string;
-  type: 'file' | 'folder';
+  type: "file" | "folder";
   sha: string;
   size?: number;
   children: TreeNode[];
@@ -29,8 +22,8 @@ function buildTree(items: RepositoryTreeItem[]): TreeNode[] {
   const root: TreeNode[] = [];
 
   const sortedItems = [...items].sort((a, b) => {
-    const aDepth = a.path.split('/').length;
-    const bDepth = b.path.split('/').length;
+    const aDepth = a.path.split("/").length;
+    const bDepth = b.path.split("/").length;
 
     if (aDepth !== bDepth) {
       return aDepth - bDepth;
@@ -40,11 +33,14 @@ function buildTree(items: RepositoryTreeItem[]): TreeNode[] {
   });
 
   for (const item of sortedItems) {
-    const parts = item.path.split('/');
+    const parts = item.path.split("/");
     let currentLevel = root;
 
     parts.forEach((part, index) => {
-      const currentPath = parts.slice(0, index + 1).join('/');
+      const currentPath = parts
+        .slice(0, index + 1)
+        .join("/");
+
       const isLastPart = index === parts.length - 1;
 
       let existingNode = currentLevel.find(
@@ -55,8 +51,8 @@ function buildTree(items: RepositoryTreeItem[]): TreeNode[] {
         existingNode = {
           name: part,
           path: currentPath,
-          type: isLastPart ? item.type : 'folder',
-          sha: isLastPart ? item.sha : '',
+          type: isLastPart ? item.type : "folder",
+          sha: isLastPart ? item.sha : "",
           size: isLastPart ? item.size : undefined,
           children: [],
         };
@@ -72,11 +68,28 @@ function buildTree(items: RepositoryTreeItem[]): TreeNode[] {
 }
 
 function getFilePaths(node: TreeNode): string[] {
-  if (node.type === 'file') {
+  if (node.type === "file") {
     return [node.path];
   }
 
   return node.children.flatMap(getFilePaths);
+}
+
+function isTestFile(path: string): boolean {
+  const normalized = path.toLowerCase();
+
+  return (
+    normalized.endsWith(".test.ts") ||
+    normalized.endsWith(".test.tsx") ||
+    normalized.endsWith(".test.js") ||
+    normalized.endsWith(".test.jsx") ||
+    normalized.endsWith(".spec.ts") ||
+    normalized.endsWith(".spec.tsx") ||
+    normalized.endsWith(".spec.js") ||
+    normalized.endsWith(".spec.jsx") ||
+    normalized.includes("/__tests__/") ||
+    normalized.includes("/tests/")
+  );
 }
 
 interface TreeNodeProps {
@@ -99,51 +112,73 @@ function TreeNodeItem({
     [node]
   );
 
-  const selectedCount = filePaths.filter((path) =>
-    selectedFiles.includes(path)
+  const isTest =
+    node.type === "file" && isTestFile(node.path);
+
+  const selectableFilePaths = React.useMemo(
+    () =>
+      filePaths.filter(
+        (path) => !isTestFile(path)
+      ),
+    [filePaths]
+  );
+
+  const selectedCount = selectableFilePaths.filter(
+    (path) => selectedFiles.includes(path)
   ).length;
 
   const isFullySelected =
-    filePaths.length > 0 && selectedCount === filePaths.length;
+    selectableFilePaths.length > 0 &&
+    selectedCount === selectableFilePaths.length;
 
   const isPartiallySelected =
-    selectedCount > 0 && selectedCount < filePaths.length;
+    selectedCount > 0 &&
+    selectedCount < selectableFilePaths.length;
 
   const handleFolderSelection = () => {
-    if (node.type !== 'folder') return;
+    if (node.type !== "folder") return;
 
     if (isFullySelected) {
-      // Remove every file inside this folder
+      //Remove every selectable file inside this folder.
       onSelectionChange(
         selectedFiles.filter(
-          (path) => !filePaths.includes(path)
+          (path) =>
+            !selectableFilePaths.includes(path)
         )
       );
     } else {
-      // Add every file inside this folder
+      // Add every selectable file inside this folder.
       onSelectionChange([
         ...selectedFiles,
-        ...filePaths.filter(
-          (path) => !selectedFiles.includes(path)
+        ...selectableFilePaths.filter(
+          (path) =>
+            !selectedFiles.includes(path)
         ),
       ]);
     }
   };
 
   const handleFileSelection = () => {
-    if (node.type !== 'file') return;
+    if (node.type !== "file" || isTest) {
+      return;
+    }
 
     if (selectedFiles.includes(node.path)) {
       onSelectionChange(
-        selectedFiles.filter((path) => path !== node.path)
+        selectedFiles.filter(
+          (path) => path !== node.path
+        )
       );
     } else {
-      onSelectionChange([...selectedFiles, node.path]);
+      onSelectionChange([
+        ...selectedFiles,
+        node.path,
+      ]);
     }
   };
 
   const handleToggle = () => {
-    if (node.type === 'folder') {
+    if (node.type === "folder") {
       setIsOpen((previous) => !previous);
     }
   };
@@ -157,13 +192,15 @@ function TreeNodeItem({
         }}
       >
         {/* Expand / collapse */}
-        {node.type === 'folder' ? (
+        {node.type === "folder" ? (
           <button
             type="button"
             onClick={handleToggle}
             className="flex h-5 w-5 shrink-0 items-center justify-center rounded hover:bg-muted"
             aria-label={
-              isOpen ? 'Collapse folder' : 'Expand folder'
+              isOpen
+                ? "Collapse folder"
+                : "Expand folder"
             }
           >
             {isOpen ? (
@@ -177,39 +214,51 @@ function TreeNodeItem({
         )}
 
         {/* Icon */}
-        {node.type === 'folder' ? (
+        {node.type === "folder" ? (
           isOpen ? (
             <FolderOpen className="h-4 w-4 shrink-0 text-muted-foreground" />
           ) : (
             <Folder className="h-4 w-4 shrink-0 text-muted-foreground" />
           )
         ) : (
-          <File className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <File
+            className={`h-4 w-4 shrink-0 ${
+              isTest
+                ? "text-muted-foreground/40"
+                : "text-muted-foreground"
+            }`}
+          />
         )}
 
         {/* Checkbox */}
         <input
           type="checkbox"
           checked={
-            node.type === 'folder'
+            node.type === "folder"
               ? isFullySelected
               : selectedFiles.includes(node.path)
           }
+          disabled={isTest}
           ref={(checkbox) => {
-            if (checkbox && node.type === 'folder') {
-              checkbox.indeterminate = isPartiallySelected;
+            if (checkbox && node.type === "folder") {
+              checkbox.indeterminate =
+                isPartiallySelected;
             }
           }}
           onChange={
-            node.type === 'folder'
+            node.type === "folder"
               ? handleFolderSelection
               : handleFileSelection
           }
-          className="h-3.5 w-3.5 cursor-pointer rounded border-border"
+          className={`h-3.5 w-3.5 rounded border-border ${
+            isTest
+              ? "cursor-not-allowed opacity-40"
+              : "cursor-pointer"
+          }`}
         />
 
         {/* Name */}
-        {node.type === 'folder' ? (
+        {node.type === "folder" ? (
           <button
             type="button"
             onClick={handleToggle}
@@ -218,21 +267,35 @@ function TreeNodeItem({
             {node.name}
           </button>
         ) : (
-          <span className="min-w-0 flex-1 truncate text-foreground">
+          <span
+            className={`min-w-0 flex-1 truncate ${
+              isTest
+                ? "text-muted-foreground/50"
+                : "text-foreground"
+            }`}
+          >
             {node.name}
           </span>
         )}
 
-        {/* Folder selection count */}
-        {node.type === 'folder' && selectedCount > 0 && (
-          <span className="mr-1 font-mono text-[10px] text-muted-foreground">
-            {selectedCount}/{filePaths.length}
+        {/* Test file label */}
+        {isTest && (
+          <span className="mr-1 rounded border border-border bg-card-2 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground/60">
+            test
           </span>
         )}
+
+        {/* Folder selection count */}
+        {node.type === "folder" &&
+          selectedCount > 0 && (
+            <span className="mr-1 font-mono text-[10px] text-muted-foreground">
+              {selectedCount}/{selectableFilePaths.length}
+            </span>
+          )}
       </div>
 
       {/* Children */}
-      {node.type === 'folder' &&
+      {node.type === "folder" &&
         isOpen &&
         node.children.length > 0 && (
           <div>
