@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, History, Settings } from 'lucide-react';
+import { LayoutDashboard, History} from 'lucide-react';
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
 
 const navItems = [
@@ -15,18 +15,13 @@ const navItems = [
   },
   {
     title: 'Repositories',
-    href: '/repositories', // Placeholder for now
+    href: '/repositories',
     icon: GitHubLogoIcon,
   },
   {
     title: 'History',
-    href: '/history', // Placeholder for now
+    href: '/history',
     icon: History,
-  },
-  {
-    title: 'Settings',
-    href: '/settings', // Placeholder for now
-    icon: Settings,
   },
 ];
 
