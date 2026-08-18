@@ -109,4 +109,70 @@ export const githubService = {
       encoding: data.encoding, // Typically base64 technically, but we decoded it. We can pass the original encoding type.
     };
   },
+
+    createOrUpdateFile: async (
+    accessToken: string,
+    owner: string,
+    repo: string,
+    path: string,
+    content: string,
+    message: string,
+    branch: string
+  ) => {
+    const client = createGithubClient(accessToken);
+
+    let existingFileSha: string | undefined;
+    try {
+      const response = await client.get(
+        `/repos/${owner}/${repo}/contents/${path}`,
+        {
+          params: {
+            ref: branch,
+          },
+        }
+      );
+
+      if (
+        response.data &&
+        !Array.isArray(response.data) &&
+        response.data.sha
+      ) {
+        existingFileSha = response.data.sha;
+      }
+    } catch (error: any) {
+      if (error?.response?.status !== 404) {
+        throw error;
+      }
+    }
+
+    const encodedContent = Buffer.from(
+      content,
+      "utf-8"
+    ).toString("base64");
+
+    const response = await client.put(
+      `/repos/${owner}/${repo}/contents/${path}`,
+      {
+        message,
+        content: encodedContent,
+        branch,
+        ...(existingFileSha
+          ? { sha: existingFileSha }
+          : {}),
+      }
+    );
+
+    return {
+      path: response.data.content?.path ?? path,
+      sha: response.data.content?.sha,
+      commit: {
+        sha: response.data.commit?.sha,
+        message: response.data.commit?.message,
+        url: response.data.commit?.html_url,
+      },
+      action: existingFileSha
+        ? "updated"
+        : "created",
+    };
+  },
 };

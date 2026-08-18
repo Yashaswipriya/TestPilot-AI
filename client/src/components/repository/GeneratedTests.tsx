@@ -1,19 +1,50 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, FileCode2, Sparkles } from "lucide-react";
+import {Check,Copy,FileCode2,Loader2,Sparkles} from "lucide-react";
+import { GitHubLogoIcon } from '@radix-ui/react-icons';
 import { GeneratedTest } from "@/services/repository.service";
+import api from "@/services/api";
 
 interface GeneratedTestsProps {
   tests: GeneratedTest[];
+  owner: string;
+  repo: string;
+  branch: string;
+}
+
+interface ApplyResult {
+  path: string;
+  sha?: string;
+  action: "created" | "updated";
+  commit?: {
+    sha?: string;
+    message?: string;
+    url?: string;
+  };
 }
 
 export function GeneratedTests({
   tests,
+  owner,
+  repo,
+  branch,
 }: GeneratedTestsProps) {
-  const [copiedFile, setCopiedFile] = useState<string | null>(
-    null
-  );
+  const [copiedFile, setCopiedFile] = useState<
+    string | null
+  >(null);
+
+  const [applyingFile, setApplyingFile] = useState<
+    string | null
+  >(null);
+
+  const [appliedFiles, setAppliedFiles] = useState<
+    Record<string, ApplyResult>
+  >({});
+
+  const [applyErrors, setApplyErrors] = useState<
+    Record<string, string>
+  >({});
 
   if (tests.length === 0) {
     return null;
@@ -32,7 +63,57 @@ export function GeneratedTests({
         setCopiedFile(null);
       }, 2000);
     } catch (error) {
-      console.error("Failed to copy generated test:", error);
+      console.error(
+        "Failed to copy generated test:",
+        error
+      );
+    }
+  };
+
+  const handleApplyToGitHub = async (
+    test: GeneratedTest
+  ) => {
+    try {
+      setApplyingFile(test.testFilePath);
+
+      setApplyErrors((previous) => {
+        const next = { ...previous };
+        delete next[test.testFilePath];
+        return next;
+      });
+
+      const response = await api.post(
+        "/analysis/apply-test",
+        {
+          owner,
+          repo,
+          path: test.testFilePath,
+          content: test.testCode,
+          branch,
+          commitMessage: `test: add generated test for ${test.sourceFilePath}`,
+        }
+      );
+
+      const result: ApplyResult = response.data;
+
+      setAppliedFiles((previous) => ({
+        ...previous,
+        [test.testFilePath]: result,
+      }));
+    } catch (error: any) {
+      console.error(
+        "Failed to apply generated test:",
+        error
+      );
+
+      setApplyErrors((previous) => ({
+        ...previous,
+        [test.testFilePath]:
+          error?.response?.data?.error ||
+          "Failed to apply test to GitHub.",
+      }));
+    } finally {
+      setApplyingFile(null);
     }
   };
 
@@ -64,6 +145,15 @@ export function GeneratedTests({
           const isCopied =
             copiedFile === test.testFilePath;
 
+          const isApplying =
+            applyingFile === test.testFilePath;
+
+          const applied =
+            appliedFiles[test.testFilePath];
+
+          const applyError =
+            applyErrors[test.testFilePath];
+
           return (
             <div
               key={`${test.sourceFilePath}-${test.testFilePath}`}
@@ -91,11 +181,12 @@ export function GeneratedTests({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="w-fit rounded-md border border-border bg-card-2 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                     {test.framework}
                   </span>
 
+                  {/* Copy */}
                   <button
                     type="button"
                     onClick={() =>
@@ -118,6 +209,33 @@ export function GeneratedTests({
                       </>
                     )}
                   </button>
+
+                  {/* Apply to GitHub */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleApplyToGitHub(test)
+                    }
+                    disabled={isApplying}
+                    className="flex h-7 items-center gap-1.5 rounded-md border border-border bg-foreground px-2.5 font-mono text-[10px] font-medium text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isApplying ? (
+                      <>
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Applying...
+                      </>
+                    ) : applied ? (
+                      <>
+                        <Check className="h-3 w-3" />
+                        Applied
+                      </>
+                    ) : (
+                      <>
+                        <GitHubLogoIcon className="h-3 w-3" />
+                        Apply to GitHub
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -134,6 +252,53 @@ export function GeneratedTests({
                   {test.explanation}
                 </p>
               </div>
+
+              {/* Success */}
+              {applied && (
+                <div className="mt-3 rounded-lg border border-border bg-card-2/40 px-4 py-3">
+                  <div className="flex items-start gap-2">
+                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-green" />
+
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-foreground">
+                        Test file{" "}
+                        {applied.action === "created"
+                          ? "created"
+                          : "updated"}{" "}
+                        on GitHub
+                      </p>
+
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        {applied.path}
+                      </p>
+
+                      {applied.commit?.url && (
+                        <a
+                          href={applied.commit.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1.5 inline-block text-[11px] text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                        >
+                          View commit
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Error */}
+              {applyError && (
+                <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3">
+                  <p className="text-xs font-medium text-destructive">
+                    Could not apply test to GitHub
+                  </p>
+
+                  <p className="mt-1 text-[11px] text-destructive/80">
+                    {applyError}
+                  </p>
+                </div>
+              )}
             </div>
           );
         })}

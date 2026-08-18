@@ -19,6 +19,7 @@ export default function RepositoryPage() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [selectedFileContents, setSelectedFileContents] = useState<RepositoryFile[]>([]);
   const [generatedTests, setGeneratedTests] = useState<GeneratedTest[]>([]);
+  const [defaultBranch, setDefaultBranch] = useState("main");
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingFiles, setIsFetchingFiles] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -28,34 +29,37 @@ export default function RepositoryPage() {
   
   //  Fetch repository tree
   useEffect(() => {
-    const fetchTree = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const fetchRepositoryData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        const data = await repositoryService.getRepositoryTree(
+      const [repository, tree] = await Promise.all([
+        repositoryService.getRepository(owner, repo),
+        repositoryService.getRepositoryTree(
           owner,
           repo
-        );
+        ),
+      ]);
 
-        setTree(data);
-      } catch (error) {
-        console.error(
-          "Failed to fetch repository tree:",
-          error
-        );
+      setDefaultBranch(repository.defaultBranch);
+      setTree(tree);
+    } catch (error) {
+      console.error(
+        "Failed to fetch repository data:",
+        error
+      );
 
-        setError("Failed to load repository files.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (owner && repo) {
-      fetchTree();
+      setError("Failed to load repository files.");
+    } finally {
+      setIsLoading(false);
     }
-  }, [owner, repo]);
+  };
 
+  if (owner && repo) {
+    fetchRepositoryData();
+  }
+}, [owner, repo]);
   
     // Fetch contents whenever selected files change
   useEffect(() => {
@@ -198,7 +202,10 @@ export default function RepositoryPage() {
 
         {/* Generated tests */}
         {generatedTests.length > 0 && (
-          <GeneratedTests tests={generatedTests} />
+          <GeneratedTests tests={generatedTests}
+            owner={owner}
+            repo={repo}
+            branch={defaultBranch} />
         )}
         {!isGenerating &&
         !generationError &&

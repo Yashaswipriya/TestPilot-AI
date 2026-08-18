@@ -64,6 +64,30 @@ export const repositoryService = {
     }));
   },
 
+  getRepository: async (
+  owner: string,
+  repo: string
+): Promise<GitHubRepository> => {
+  const response = await api.get(
+    `/repositories/${owner}/${repo}`
+  );
+
+  const data = response.data;
+
+  return {
+    _id: data.id.toString(),
+    name: data.name,
+    fullName: data.full_name ?? `${owner}/${data.name}`,
+    owner: data.owner,
+    url: data.html_url,
+    description: data.description,
+    language: data.language,
+    isPrivate: data.private,
+    defaultBranch: data.default_branch,
+    lastSyncedAt: data.updated_at ?? "",
+  };
+},
+
   importRepository: async (owner: string, repo: string) => {
     const response = await api.post(
       `/repositories/${owner}/${repo}/import`
