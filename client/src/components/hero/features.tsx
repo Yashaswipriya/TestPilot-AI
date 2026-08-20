@@ -44,7 +44,7 @@ export function Features() {
     <section id="features" className="relative z-10 px-8 pb-24">
       <div className="mx-auto max-w-[1120px]">
         <div className="mb-14 max-w-[560px]">
-          <div className="mb-3.5 font-mono text-[12.5px] text-green">// FEATURES</div>
+          <div className="mb-3.5 font-mono text-[12.5px] text-green">{"// FEATURES"}</div>
           <h2 className="mb-3.5 text-[28px] font-extrabold leading-tight tracking-[-1.2px] sm:text-[34px]">
             Built for repos you didn&apos;t write alone.
           </h2>

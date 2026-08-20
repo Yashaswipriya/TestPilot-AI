@@ -19,7 +19,7 @@ export function FrameworkDetect() {
       <div className="mx-auto max-w-[1120px]">
         <div className="grid grid-cols-1 overflow-hidden rounded-xl border border-border bg-card md:grid-cols-2">
           <div className="border-b border-border-soft p-9 md:border-b-0 md:border-r">
-            <div className="mb-2.5 font-mono text-[12.5px] text-green">// DETECTION</div>
+            <div className="mb-2.5 font-mono text-[12.5px] text-green">{"// DETECTION"}</div>
             <h3 className="mb-3 text-[22px] font-extrabold tracking-[-0.6px]">
               It reads your config, not your description.
             </h3>

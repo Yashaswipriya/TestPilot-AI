@@ -46,11 +46,23 @@ export interface GenerateTestsResponse {
   tests: GeneratedTest[];
 }
 
+interface GitHubRepositoryResponse {
+  id: number;
+  name: string;
+  full_name: string;
+  description: string | null;
+  language: string | null;
+  default_branch: string;
+  private: boolean;
+  html_url: string;
+  updated_at: string;
+}
+
 export const repositoryService = {
   getRepositories: async (): Promise<GitHubRepository[]> => {
     const response = await api.get("/repositories");
 
-    return response.data.map((repo: any) => ({
+    return response.data.map((repo: GitHubRepositoryResponse) => ({
       _id: repo.id.toString(),
       name: repo.name,
       fullName: repo.full_name,

@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {ArrowLeft,Check,Clock3,Copy,FileCode2,History as HistoryIcon,Loader2} from "lucide-react";
 import {historyService,TestGenerationHistory} from "@/services/history.service";
+import axios from "axios";
 
 export default function HistoryDetailPage() {
   const params = useParams();
@@ -34,21 +35,25 @@ export default function HistoryDetailPage() {
           await historyService.getHistoryById(id);
 
         setHistory(data);
-      } catch (error: any) {
-        console.error(
-          "Failed to fetch history entry:",
-          error
-        );
-
-        if (error?.response?.status === 404) {
-          setError("History entry not found.");
-        } else {
-          setError(
-            error?.response?.data?.error ||
-              "Failed to load this generation."
+      } catch (error) {
+          console.error(
+            "Failed to fetch history entry:",
+            error
           );
-        }
-      } finally {
+
+          if (axios.isAxiosError<{ error?: string }>(error)) {
+            if (error.response?.status === 404) {
+              setError("History entry not found.");
+            } else {
+              setError(
+                error.response?.data?.error ||
+                  "Failed to load this generation."
+              );
+            }
+          } else {
+            setError("Failed to load this generation.");
+          }
+        } finally {
         setIsLoading(false);
       }
     };

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {ArrowRight,CheckCircle2,Clock3,FileCode2,History as HistoryIcon,Loader2} from "lucide-react";
 import {historyService,TestGenerationHistory} from "@/services/history.service";
+import axios from "axios";
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<
@@ -24,16 +25,21 @@ export default function HistoryPage() {
         const data = await historyService.getHistory();
 
         setHistory(data);
-      } catch (error: any) {
+      } catch (error) {
         console.error(
           "Failed to fetch history:",
           error
         );
-
+        if (axios.isAxiosError<{ error?: string }>(error)) {
         setError(
-          error?.response?.data?.error ||
+          error.response?.data?.error ||
             "Failed to load test generation history."
         );
+      } else {
+        setError(
+          "Failed to load test generation history."
+        );
+      }
       } finally {
         setIsLoading(false);
       }

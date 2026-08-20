@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { Skeleton } from '@/components/ui/skeleton';
 import {FolderGit2,TestTube2,Clock,ArrowRight,CheckCircle2,FileCode2,Loader2} from 'lucide-react';
 import {historyService,TestGenerationHistory} from '@/services/history.service';
+import axios from "axios";
 
 export default function DashboardPage() {
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -31,16 +32,22 @@ export default function DashboardPage() {
         const data = await historyService.getHistory();
 
         setHistory(data);
-      } catch (error: any) {
+      } catch (error) {
         console.error(
           'Failed to fetch dashboard history:',
           error
         );
 
+        if (axios.isAxiosError<{ error?: string }>(error)) {
         setHistoryError(
-          error?.response?.data?.error ||
-            'Failed to load dashboard history.'
+          error.response?.data?.error ||
+            "Failed to load dashboard history."
         );
+      } else {
+        setHistoryError(
+          "Failed to load dashboard history."
+        );
+      }
       } finally {
         setIsHistoryLoading(false);
       }

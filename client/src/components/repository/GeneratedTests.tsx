@@ -5,6 +5,7 @@ import {Check,Copy,FileCode2,Loader2,Sparkles} from "lucide-react";
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
 import { GeneratedTest } from "@/services/repository.service";
 import api from "@/services/api";
+import axios from "axios";
 
 interface GeneratedTestsProps {
   tests: GeneratedTest[];
@@ -100,18 +101,26 @@ export function GeneratedTests({
         ...previous,
         [test.testFilePath]: result,
       }));
-    } catch (error: any) {
+    } catch (error) {
       console.error(
         "Failed to apply generated test:",
         error
       );
 
-      setApplyErrors((previous) => ({
-        ...previous,
-        [test.testFilePath]:
-          error?.response?.data?.error ||
-          "Failed to apply test to GitHub.",
-      }));
+      if (axios.isAxiosError<{ error?: string }>(error)) {
+        setApplyErrors((previous) => ({
+          ...previous,
+          [test.testFilePath]:
+            error.response?.data?.error ||
+            "Failed to apply test to GitHub.",
+        }));
+      } else {
+        setApplyErrors((previous) => ({
+          ...previous,
+          [test.testFilePath]:
+            "Failed to apply test to GitHub.",
+        }));
+      }
     } finally {
       setApplyingFile(null);
     }

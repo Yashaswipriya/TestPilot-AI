@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {ChevronRight,ChevronDown,File,Folder,FolderOpen,Sparkles} from "lucide-react";
+import {ChevronRight,ChevronDown,File,Folder,FolderOpen} from "lucide-react";
 import { RepositoryTreeItem } from "@/services/repository.service";
 interface RepositoryTreeProps {
   items: RepositoryTreeItem[];

@@ -8,6 +8,7 @@ import { RepositoryFileExplorer } from "../../../../components/repository/Reposi
 import { RepositorySelectionPanel } from "../../../../components/repository/RepositorySelectionPanel";
 import { GeneratedTests } from "../../../../components/repository/GeneratedTests";
 import { Sparkles } from "lucide-react";
+import axios from "axios";
 
 export default function RepositoryPage() {
   const params = useParams();
@@ -127,16 +128,22 @@ export default function RepositoryPage() {
         );
 
       setGeneratedTests(response.tests);
-    } catch (error: any) {
+    } catch (error) {
       console.error(
         "Failed to generate tests:",
         error
       );
 
-      setGenerationError(
-        error?.response?.data?.error ||
+      if (axios.isAxiosError<{ error?: string }>(error)) {
+        setGenerationError(
+          error.response?.data?.error ||
+            "Failed to generate tests. Please try again."
+        );
+      } else {
+        setGenerationError(
           "Failed to generate tests. Please try again."
-      );
+        );
+      }
     } finally {
       setIsGenerating(false);
     }
