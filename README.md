@@ -1,6 +1,6 @@
-# 🧪 TestPilot AI
+#  TestPilot AI
 
-### 🌐 [Live Demo](https://testpilot-ai.me/)
+###  [Live Demo](https://testpilot-ai.me/)
 
 **TestPilot AI is a full-stack developer tool that brings automated test generation directly into the GitHub workflow.** Select a repository and source file, generate framework-aware tests, review the result, and write the test directly back to GitHub — while maintaining a persistent history of every generation.
 
@@ -8,19 +8,19 @@ The application is built with a **Next.js frontend and Express backend**, with b
 
 ##  Features
 
-* ** GitHub Repository Integration:**
+* ### GitHub Repository Integration:
   Browse repositories and source files directly through the application.
 
-* ** Framework-Aware Test Generation:**
+* ### Framework-Aware Test Generation:
   Generate tests based on the project's language, framework, and source-code context.
 
-* ** GitHub Write-Back:**
+* ### GitHub Write-Back:
   Commit generated test files directly to the selected GitHub repository.
 
-* ** Persistent Generation History:**
+* ### Persistent Generation History:
   Save and revisit previous test generations even after leaving the generation workflow.
 
-* ** Full-Stack AWS Deployment:**
+* ### Full-Stack AWS Deployment:
   Both the Next.js frontend and Express backend run on a cloud-hosted AWS EC2 instance.
 
 ##  Architecture
@@ -46,7 +46,7 @@ The application is built with a **Next.js frontend and Express backend**, with b
 
 Both frontend and backend are deployed on **AWS EC2**.
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Layer           | Technologies                 |
 | --------------- | ---------------------------- |
@@ -107,14 +107,6 @@ npm run dev
 
 ```bash
 cd testpilot-ai/server
-npm install
-npm run dev
-```
-
-
-### Server
-```bash
-cd server
 npm install
 npm run dev
 ```
