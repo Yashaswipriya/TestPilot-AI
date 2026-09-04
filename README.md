@@ -6,24 +6,24 @@
 
 The application is built with a **Next.js frontend and Express backend**, with both deployed on **AWS EC2**. The backend handles GitHub integration, AI services, and persistent application data.
 
-## ✨ Features
+##  Features
 
-* **🔗 GitHub Repository Integration**
+* ** GitHub Repository Integration:**
   Browse repositories and source files directly through the application.
 
-* **🧪 Framework-Aware Test Generation**
+* ** Framework-Aware Test Generation:**
   Generate tests based on the project's language, framework, and source-code context.
 
-* **⬆️ GitHub Write-Back**
+* ** GitHub Write-Back:**
   Commit generated test files directly to the selected GitHub repository.
 
-* **🕘 Persistent Generation History**
+* ** Persistent Generation History:**
   Save and revisit previous test generations even after leaving the generation workflow.
 
-* **☁️ Full-Stack AWS Deployment**
+* ** Full-Stack AWS Deployment:**
   Both the Next.js frontend and Express backend run on a cloud-hosted AWS EC2 instance.
 
-## 🏗️ Architecture
+##  Architecture
 
 ```text
                          ┌─────────────────┐
@@ -57,7 +57,7 @@ Both frontend and backend are deployed on **AWS EC2**.
 | **Persistence** | Generation History           |
 | **Deployment**  | AWS EC2                      |
 
-## 🚀 Workflow
+##  Workflow
 
 ```text
 GitHub Repository
@@ -75,7 +75,7 @@ Write Back to GitHub
 
 The generated test becomes an **actual file in the repository**, while the generation itself remains accessible through TestPilot's history.
 
-## ☁️ Deployment
+##  Deployment
 
 TestPilot runs as a full-stack application on **AWS EC2**, with the Next.js frontend and Express backend hosted on the same cloud instance.
 
